@@ -33,6 +33,17 @@
       crossorigin="anonymous"
     ></script>
     <script>
+      const priorities = [
+        "rektor",
+        "wr1",
+        "wr2",
+        "wr3",
+        "wr4",
+        "nafkhan",
+        "bintang",
+        "aldinata",
+      ];
+
       var stillProcessing = 0;
       function playAudio(audio) {
         return new Promise((res) => {
@@ -71,7 +82,7 @@
           // console.log(formData.get("file"))
           // console.log(formData);
           url =
-            "https://compre-face.nafkhanzam.com/api/v1/recognition/recognize?face_plugins=landmarks";
+            "https://compre-face.nafkhanzam.com/api/v1/recognition/recognize";
           const response = await fetch(url, {
             headers: { "x-api-key": "3a375532-1c69-4159-9116-d76acbd294ca" },
             method: "POST",
@@ -79,12 +90,26 @@
           });
           const data = await response.json();
           if ("result" in data) {
-            let nama = null;
-            if (data.result[0].subjects[0].similarity > 0.987) {
-              nama = data.result[0].subjects[0].subject;
-            } else {
-              nama = "tamu_undangan";
+            let nama = "tamu_undangan";
+            const results = data.result.filter(
+              (v) => v.subjects[0].similarity > 0.9
+            );
+            const now = Date.now();
+            let found = false;
+            for (const res of results) {
+              for (const prio of priorities) {
+                const subjectName = res.subjects[0].subject;
+                if (prio === subjectName) {
+                  nama = subjectName;
+                  found = true;
+                  break;
+                }
+              }
+              if (found) {
+                break;
+              }
             }
+
             let message = `<p>HALO ${nama}, ${data.result[0].subjects[0].similarity}</p>`;
             // alert(message);
             $("#papan").empty().append(message);
@@ -104,7 +129,7 @@
 
       setInterval(function () {
         $("#click-photo").trigger("click");
-      }, 1000);
+      }, 2000);
     </script>
   </body>
 </html>

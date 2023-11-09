@@ -1,0 +1,19 @@
+{
+  "result": [
+    {
+      "box": {
+        "probability": 0.99913,
+        "x_max": 185,
+        "y_max": 236,
+        "x_min": 81,
+        "y_min": 118
+      },
+      "subjects": [
+        {
+          "subject": "nafkhan",
+          "similarity": 0.99862
+        }
+      ]
+    }
+  ]
+}
