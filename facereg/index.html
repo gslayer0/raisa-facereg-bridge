@@ -32,14 +32,34 @@
     ></script>
     <script>
       const priorities = [
-        "rektor",
-        "wr1",
-        "wr2",
-        "wr3",
-        "wr4",
-        "nafkhan",
-        "bintang",
-        "aldinata",
+        "1nuh",
+        "2dwi",
+        "3lily",
+        "4nadiem",
+        "5khofifah",
+        "6ashari",
+        "7syafsir",
+        "8imam",
+        "9adi",
+        "10mas",
+        "11rusdiansyah",
+        "12bambang",
+        "13yuhana",
+        "14hamzah",
+        "15widodo",
+        "16murni",
+        "17trika",
+        "18ketut",
+        "19baihaqi",
+        "20darmawan",
+        "21susilo",
+        "22pujawan",
+        "23emil",
+        "24elestianto",
+        "25gunadi",
+        "26triyogi",
+        "27lee",
+        "28inoe"
       ];
 
       let stillProcessing = false;
@@ -50,7 +70,7 @@
             audio.play();
           audio.onended = res;
           } catch(error) {
-            stillProcessing = 0;
+            // stillProcessing = 0;
           }
 
         });
@@ -117,25 +137,26 @@
                     last !== res.subjects[0].subject
                   ) {
                     subject = res.subjects[0];
-                    found = true;                    break;
+                    found = true;                    
+                    break;
                   }
                 }
                 if (found) {
                   break;
                 }
               }
-
               let old = subject;
               if (subject.similarity < 0.95) {
                 subject = tamu;
               }
               if (subject.subject !== last) {
-                last = subject.subject;                
+                last = subject.subject == 'tamu_undangan' ? null : subject.subject;                
                 let aud = document.getElementById("video-sambutan");
                 $("#video-sambutan").prop("src", `video/${subject.subject}.mp4`);
                 await playAudio(aud);
               } else {
-                $("#video-sambutan").prop("src", "video/loop.mp4");
+                  let aud = document.getElementById("video-sambutan");
+                  $("#video-sambutan").prop("src", "video/loop.mp4");
                   await playAudio(aud);
               }
             } else {
@@ -163,3 +184,4 @@
     </script>
   </body>
 </html>
+ 
