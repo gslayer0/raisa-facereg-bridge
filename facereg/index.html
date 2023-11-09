@@ -5,20 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
   </head>
-  <body style="overflow: hidden; margin: 0px; background-color: #02345B; overflow: hidden;">
+  <body
+    style="
+      overflow: hidden;
+      margin: 0px;
+      background-color: #02345b;
+      overflow: hidden;
+    "
+  >
     <div id="video-container">
-      <video id="video-sambutan" width="100%" height="100%" src="video/loop.mp4" autoplay></video>    
+      <video
+        id="video-sambutan"
+        width="100%"
+        height="100%"
+        src="video/loop.mp4"
+        autoplay
+        loop
+      ></video>
     </div>
- <!-- style="visibility: hidden" -->
+    <!-- style="visibility: hidden" -->
     <button id="click-photo" style="visibility: hidden">Click Photo</button>
     <button id="start-camera" style="visibility: hidden">Start Camera</button>
     <canvas
-    id="canvas"
-    width="320"
-    height="240"
-    style="visibility: hidden"
+      id="canvas"
+      width="320"
+      height="240"
+      style="visibility: hidden"
     ></canvas>
-    <video id="video" width="100%" height="100%" autoplay style="visibility: hidden; display: none;"></video>
+    <video
+      id="video"
+      width="100%"
+      height="100%"
+      autoplay
+      style="visibility: hidden; display: none"
+    ></video>
 
     <p id="papan"></p>
     <audio id="aud" src="" controls style="visibility: hidden">
@@ -30,7 +50,7 @@
       integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
       crossorigin="anonymous"
     ></script>
-    <script>
+    <script defer>
       const priorities = [
         "1nuh",
         "2dwi",
@@ -59,20 +79,23 @@
         "25gunadi",
         "26triyogi",
         "27lee",
-        "28inoe"
+        "28inoe",
+        "nafkhan",
+        "bintang",
+        "aldinata",
+        "arta",
       ];
 
       let stillProcessing = false;
       let last = null;
       function playAudio(audio) {
         return new Promise((res) => {
-          try{
+          try {
             audio.play();
-          audio.onended = res;
-          } catch(error) {
+            audio.onended = res;
+          } catch (error) {
             // stillProcessing = 0;
           }
-
         });
       }
 
@@ -81,7 +104,25 @@
       let click_button = document.querySelector("#click-photo");
       let canvas = document.querySelector("#canvas");
 
-      camera_button.addEventListener("click", async function () {
+      // camera_button.addEventListener("click", async function () {
+      //   // let streams = await navigator.mediaDevices.enumerateDevices();
+      //   // streams = streams.filter((v) => v.kind === "videoinput");
+      //   // const id = streams[streams.length - 1].deviceId;
+      //   // video.srcObject = await navigator.mediaDevices.getUserMedia({
+      //   //   video: {
+      //   //     deviceId: {
+      //   //       exact: id,
+      //   //     },
+      //   //   },
+      //   // });
+      //   video.srcObject = await navigator.mediaDevices.getUserMedia({
+      //     video: true,
+      //     audio: false,
+      //   });
+      //   console.log("Camera started...");
+      // });
+
+      (async () => {
         // let streams = await navigator.mediaDevices.enumerateDevices();
         // streams = streams.filter((v) => v.kind === "videoinput");
         // const id = streams[streams.length - 1].deviceId;
@@ -95,93 +136,112 @@
         video.srcObject = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false,
-        })
-      });
+        });
+        async function run() {
+          canvas
+            .getContext("2d")
+            .drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      $("#start-camera").trigger("click");
-      click_button.addEventListener("click", async function () {
-        if (stillProcessing) return;
-        stillProcessing = true;
-        canvas
-          .getContext("2d")
-          .drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        let blob = canvas.toBlob(async (blob) => {
-          try {
-            let file = new File([blob], "fileName.jpg", { type: "image/jpeg" });
-            let formData = new FormData();
-            formData.append("file", file);
-            url =
-              "https://compre-face.nafkhanzam.com/api/v1/recognition/recognize";
-            const response = await fetch(url, {
-              headers: { "x-api-key": "3a375532-1c69-4159-9116-d76acbd294ca" },
-              method: "POST",
-              body: formData,
-            });
-            const data = await response.json();
-            if ("result" in data) {
-              try {
-                console.log(data.result.map((v) => v.subjects[0]));
-              } catch (error) {
-                console.error(error);
-              }
-              const tamu = { subject: "tamu_undangan", similarity: 0 };
-              let subject = { subject: "tamu_undangan", similarity: 0 };
-              const results = data.result;
-              const now = Date.now();
-              let found = false;
-              for (const res of results) {
-                for (const prio of priorities) {
-                  if (
-                    prio === res.subjects[0].subject &&
-                    last !== res.subjects[0].subject
-                  ) {
-                    subject = res.subjects[0];
-                    found = true;                    
+          let blob = canvas.toBlob(async (blob) => {
+            try {
+              let file = new File([blob], "fileName.jpg", {
+                type: "image/jpeg",
+              });
+              let formData = new FormData();
+              formData.append("file", file);
+              url =
+                "https://compre-face.nafkhanzam.com/api/v1/recognition/recognize";
+              console.log("Processing image...");
+              const response = await fetch(url, {
+                headers: {
+                  "x-api-key": "3a375532-1c69-4159-9116-d76acbd294ca",
+                },
+                method: "POST",
+                body: formData,
+              });
+              const data = await response.json();
+              if ("result" in data) {
+                try {
+                  console.log(data.result.map((v) => v.subjects[0]));
+                } catch (error) {
+                  console.error(error);
+                }
+                const tamu = { subject: "tamu_undangan", similarity: 0 };
+                let subject = null;
+                const results = data.result;
+                const now = Date.now();
+                let found = false;
+                for (const res of results) {
+                  for (const prio of priorities) {
+                    if (
+                      prio === res.subjects[0].subject &&
+                      last !== res.subjects[0].subject
+                    ) {
+                      subject = res.subjects[0];
+                      found = true;
+                      break;
+                    }
+                  }
+                  if (found) {
                     break;
                   }
                 }
-                if (found) {
-                  break;
+                let old = subject;
+                if (subject && subject.similarity < 0.95) {
+                  console.log(subject.similarity);
+                  subject = tamu;
+                  found = true;
                 }
-              }
-              let old = subject;
-              if (subject.similarity < 0.95) {
-                subject = tamu;
-              }
-              if (subject.subject !== last) {
-                last = subject.subject == 'tamu_undangan' ? null : subject.subject;                
-                let aud = document.getElementById("video-sambutan");
-                $("#video-sambutan").prop("src", `video/${subject.subject}.mp4`);
-                await playAudio(aud);
+                if (found) {
+                  console.log(subject.subject, last);
+                  if (subject.subject !== last) {
+                    if (subject.subject !== "tamu_undangan") {
+                      last = subject.subject;
+                    }
+                    let aud = document.getElementById("video-sambutan");
+                    $("#video-sambutan").prop(
+                      "src",
+                      `video/${subject.subject}.mp4`
+                    );
+                    $("#video-sambutan").prop("loop", false);
+                    await playAudio(aud);
+                  } else {
+                    let aud = document.getElementById("video-sambutan");
+                    $("#video-sambutan").prop("src", "video/loop.mp4");
+                    $("#video-sambutan").prop("loop", true);
+                    await playAudio(aud);
+                  }
+                } else {
+                  let aud = document.getElementById("video-sambutan");
+                  $("#video-sambutan").prop("src", "video/loop.mp4");
+                  $("#video-sambutan").prop("loop", true);
+                  await playAudio(aud);
+                }
               } else {
-                  let aud = document.getElementById("video-sambutan");
-                  $("#video-sambutan").prop("src", "video/loop.mp4");
-                  await playAudio(aud);
+                let aud = document.getElementById("video-sambutan");
+                $("#video-sambutan").prop("src", "video/loop.mp4");
+                $("#video-sambutan").prop("loop", true);
+                await playAudio(aud);
               }
-            } else {
-                  let aud = document.getElementById("video-sambutan");
-                  $("#video-sambutan").prop("src", "video/loop.mp4");
-                  await playAudio(aud);
+            } catch (error) {
+              console.error(error);
+            } finally {
+              if (!$("#video-sambutan")[0].src.endsWith("video/loop.mp4")) {
+                $("#video-sambutan").prop("src", "video/loop.mp4");
+                $("#video-sambutan").prop("loop", true);
+              }
             }
-            stillProcessing = 0;
-          } catch (error) {
-            console.error(error);
-          } finally {
             console.log("done");
-            stillProcessing = 0;
-          }
-        });
-      });
+            setTimeout(function () {
+              run();
+            }, 1000);
+          });
+        }
 
-      // $("#aud").on("ended", function(){
-      //         stillProcessing = 0;
-      // });
-
-      setInterval(function () {
-        $("#click-photo").trigger("click");
-      }, 100);
+        setTimeout(function () {
+          run();
+        }, 1000);
+      })();
     </script>
   </body>
 </html>
- 
