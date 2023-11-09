@@ -1,99 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
-
-    <button id="start-camera" style="visibility: hidden;">Start Camera</button>
-    <video id="video" width="320" height="240" autoplay style="visibility: hidden;"></video>
-    <button id="click-photo" style="visibility: hidden;">Click Photo</button>
-    <canvas id="canvas" width="320" height="240" style="visibility: hidden;"></canvas>
+  </head>
+  <body>
+    <button id="start-camera" style="visibility: hidden">Start Camera</button>
+    <video
+      id="video"
+      width="320"
+      height="240"
+      autoplay
+      style="visibility: hidden"
+    ></video>
+    <button id="click-photo" style="visibility: hidden">Click Photo</button>
+    <canvas
+      id="canvas"
+      width="320"
+      height="240"
+      style="visibility: hidden"
+    ></canvas>
 
     <p id="papan"></p>
-    <audio id="aud" src="" controls style="visibility: hidden;">
-        Your browser does not support the audio element.
+    <audio id="aud" src="" controls style="visibility: hidden">
+      Your browser does not support the audio element.
     </audio>
-    
 
     <script
-    src="https://code.jquery.com/jquery-3.7.1.min.js"
-    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-    crossorigin="anonymous"></script>
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
     <script>
-
-        var stillProcessing = 0;
-        function playAudio(audio){
-            return new Promise(res=>{
-                audio.play()
-                audio.onended = res
-        })
-}
-
-        let camera_button = document.querySelector("#start-camera");
-        let video = document.querySelector("#video");
-        let click_button = document.querySelector("#click-photo");
-        let canvas = document.querySelector("#canvas");
-
-        camera_button.addEventListener('click', async function() {
-            let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-            video.srcObject = stream;
+      var stillProcessing = 0;
+      function playAudio(audio) {
+        return new Promise((res) => {
+          audio.play();
+          audio.onended = res;
         });
+      }
 
-        $("#start-camera").trigger("click");
-        click_button.addEventListener('click', async function() {
-            if(stillProcessing == 1) return;
-            stillProcessing = 1;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            // let image_data_url = canvas.toDataURL('image/png');
-            // let image_base64 = image_data_url.replace(/^data:image\/png;base64,/, "");
+      let camera_button = document.querySelector("#start-camera");
+      let video = document.querySelector("#video");
+      let click_button = document.querySelector("#click-photo");
+      let canvas = document.querySelector("#canvas");
 
+      camera_button.addEventListener("click", async function () {
+        let stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+        video.srcObject = stream;
+      });
 
-            let blob = canvas.toBlob(async (blob) => {
-            let file = new File([blob], "fileName.jpg", { type: "image/jpeg" })           
-            let formData = new FormData();
-		    formData.append('file', file);
-            // console.log(formData.get("file"))
-            // console.log(formData);
-            url = "https://compre-face.nafkhanzam.com/api/v1/recognition/recognize?face_plugins=landmarks"
-            const response = await fetch(url, {
-                headers: {"x-api-key": "3a375532-1c69-4159-9116-d76acbd294ca"},
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            if("result" in data) {
-                let nama = null;
-                if(data.result[0].subjects[0].similarity > 0.987) {
-                    nama = data.result[0].subjects[0].subject;
-                }
-                else {
-                    nama = "tamu_undangan";
-                }
-                let message = `<p>HALO ${nama}, ${data.result[0].subjects[0].similarity}</p>`;
-                // alert(message);
-                $("#papan").empty().append(message);
-                $("#aud").prop("src", `audio/${nama}.mp3`);
-                let aud = document.getElementById("aud");
-                await playAudio(aud)
+      $("#start-camera").trigger("click");
+      click_button.addEventListener("click", async function () {
+        if (stillProcessing == 1) return;
+        stillProcessing = 1;
+        canvas
+          .getContext("2d")
+          .drawImage(video, 0, 0, canvas.width, canvas.height);
+        // let image_data_url = canvas.toDataURL('image/png');
+        // let image_base64 = image_data_url.replace(/^data:image\/png;base64,/, "");
+
+        let blob = canvas.toBlob(async (blob) => {
+          let file = new File([blob], "fileName.jpg", { type: "image/jpeg" });
+          let formData = new FormData();
+          formData.append("file", file);
+          // console.log(formData.get("file"))
+          // console.log(formData);
+          url =
+            "https://compre-face.nafkhanzam.com/api/v1/recognition/recognize?face_plugins=landmarks";
+          const response = await fetch(url, {
+            headers: { "x-api-key": "3a375532-1c69-4159-9116-d76acbd294ca" },
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+          if ("result" in data) {
+            let nama = null;
+            if (data.result[0].subjects[0].similarity > 0.987) {
+              nama = data.result[0].subjects[0].subject;
             } else {
-                stillProcessing = 0;
+              nama = "tamu_undangan";
             }
+            let message = `<p>HALO ${nama}, ${data.result[0].subjects[0].similarity}</p>`;
+            // alert(message);
+            $("#papan").empty().append(message);
+            $("#aud").prop("src", `audio/${nama}.mp3`);
+            let aud = document.getElementById("aud");
+            await playAudio(aud);
+          } else {
             stillProcessing = 0;
-            });
-            
-
+          }
+          stillProcessing = 0;
         });
+      });
 
-        // $("#aud").on("ended", function(){
-        //         stillProcessing = 0;
-        // });
+      // $("#aud").on("ended", function(){
+      //         stillProcessing = 0;
+      // });
 
-        setInterval(function () {$("#click-photo").trigger("click")}, 1000);
-        
+      setInterval(function () {
+        $("#click-photo").trigger("click");
+      }, 1000);
     </script>
-
-</body>
+  </body>
 </html>
