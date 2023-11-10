@@ -82,8 +82,6 @@
         "28inoe",
         "nafkhan",
         "bintang",
-        "aldinata",
-        "arta",
       ];
 
       let stillProcessing = false;
@@ -123,20 +121,20 @@
       // });
 
       (async () => {
-        // let streams = await navigator.mediaDevices.enumerateDevices();
-        // streams = streams.filter((v) => v.kind === "videoinput");
-        // const id = streams[streams.length - 1].deviceId;
-        // video.srcObject = await navigator.mediaDevices.getUserMedia({
-        //   video: {
-        //     deviceId: {
-        //       exact: id,
-        //     },
-        //   },
-        // });
+        let streams = await navigator.mediaDevices.enumerateDevices();
+        streams = streams.filter((v) => v.kind === "videoinput");
+        const id = streams[streams.length - 1].deviceId;
         video.srcObject = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
+          video: {
+            deviceId: {
+              exact: id,
+            },
+          },
         });
+        // video.srcObject = await navigator.mediaDevices.getUserMedia({
+        //   video: true,
+        //   audio: false,
+        // });
         async function run() {
           canvas
             .getContext("2d")
@@ -167,7 +165,7 @@
                   console.error(error);
                 }
                 const tamu = { subject: "tamu_undangan", similarity: 0 };
-                let subject = null;
+                let subject = tamu;
                 const results = data.result;
                 const now = Date.now();
                 let found = false;
@@ -192,36 +190,52 @@
                   subject = tamu;
                   found = true;
                 }
-                if (found) {
+                console.log("YESY");
+                if (found || subject.subject === "tamu_undangan") {
                   console.log(subject.subject, last);
-                  if (subject.subject !== last) {
+                  if (
+                    subject.subject !== last ||
+                    subject.subject === "tamu_undangan"
+                  ) {
                     if (subject.subject !== "tamu_undangan") {
                       last = subject.subject;
                     }
-                    let aud = document.getElementById("video-sambutan");
-                    $("#video-sambutan").prop(
-                      "src",
-                      `video/${subject.subject}.mp4`
-                    );
-                    $("#video-sambutan").prop("loop", false);
-                    await playAudio(aud);
+                    if (
+                      $("#video-sambutan")[0].src.endsWith("video/loop.mp4")
+                    ) {
+                      let aud = document.getElementById("video-sambutan");
+                      $("#video-sambutan").prop(
+                        "src",
+                        `video/${subject.subject}.mp4`
+                      );
+                      $("#video-sambutan").prop("loop", false);
+                      await playAudio(aud);
+                    }
                   } else {
+                    if (
+                      !$("#video-sambutan")[0].src.endsWith("video/loop.mp4")
+                    ) {
+                      let aud = document.getElementById("video-sambutan");
+                      $("#video-sambutan").prop("src", "video/loop.mp4");
+                      $("#video-sambutan").prop("loop", true);
+                      await playAudio(aud);
+                    }
+                  }
+                } else {
+                  if (!$("#video-sambutan")[0].src.endsWith("video/loop.mp4")) {
                     let aud = document.getElementById("video-sambutan");
                     $("#video-sambutan").prop("src", "video/loop.mp4");
                     $("#video-sambutan").prop("loop", true);
                     await playAudio(aud);
                   }
-                } else {
+                }
+              } else {
+                if (!$("#video-sambutan")[0].src.endsWith("video/loop.mp4")) {
                   let aud = document.getElementById("video-sambutan");
                   $("#video-sambutan").prop("src", "video/loop.mp4");
                   $("#video-sambutan").prop("loop", true);
                   await playAudio(aud);
                 }
-              } else {
-                let aud = document.getElementById("video-sambutan");
-                $("#video-sambutan").prop("src", "video/loop.mp4");
-                $("#video-sambutan").prop("loop", true);
-                await playAudio(aud);
               }
             } catch (error) {
               console.error(error);
@@ -234,13 +248,13 @@
             console.log("done");
             setTimeout(function () {
               run();
-            }, 1000);
+            }, 100);
           });
         }
 
         setTimeout(function () {
           run();
-        }, 1000);
+        }, 2000);
       })();
     </script>
   </body>
